@@ -1,5 +1,4 @@
 <?php
-
 $SID=$_POST["id"];
 $con=mysqli_connect("localhost","root","","testt")or die("connection faield!!");
 $sql="DELETE FROM  student WHERE Id={$SID}";
