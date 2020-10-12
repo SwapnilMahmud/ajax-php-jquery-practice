@@ -43,15 +43,33 @@
          right:-15px;
          cursor:pointer;
        }
+       #delete-btn{
+         color:white;
+         background-color:tomato;
+       }
     </style>
   </head>
   <body>
 
-
+<div> <button id="delete-btn" >Delete</button></div>
 
 
       <div>
         <table>
+
+
+
+
+                      <tr>
+                          <td>
+                              <div  id="search-bar">
+                                 <label>Search</label>
+                                 <input type="text" id="search" autocomplete="off">
+                              </div>
+                          </td>
+                      </tr>
+
+
             <tr>
                  <td >
                      <form id="add-form">
@@ -62,48 +80,34 @@
                    </form>
                  </td>
 
+
             </tr>
+
+
+
+
+
+
             <tr>
                  <td id="table-data"></td>
             </tr>
         </table>
       </div>
 
-
-
-
-
-
-
-
-
-      <div id="modal">
+   <div id="modal">
        <div id="modal-form">
            <h2>Edit Form</h2>
            <table cellpadding="0" width="100%">
-               <tr>
-                   <td>Name:</td>
-                   <td><input type="text" id="edit-name"></td>
 
-               </tr>
-
-               <tr>
-                   <td>Address</td>
-                   <td><input type="text" id="edit-address"></td>
-
-               </tr>
-
-               <tr>
-
-                   <td><input type="submit" id="edit-submit" value="save"></td>
-
-               </tr>
 
            </table>
            <div id="close-btn">x</div>
        </div>
 
       </div>
+
+
+
 
 
 
@@ -121,6 +125,10 @@ $(document).ready(function(){
      });
    }
    loadTable();
+
+
+
+
 
 
 
@@ -149,42 +157,126 @@ $(document).ready(function(){
    });
 
 
-$(document).on("click",".delete-btn",function(){
-var sid= $(this).data("id");
-var e=this;
-$.ajax({
-url:"ajax-delete.php",
-type:"POST",
-data:{id:sid},
-success:function(data){
-  if(data == 1){
+
+
+
+   $(document).on("click",".delete-btn",function(){
+   var sid= $(this).data("id");
+   var e=this;
+   $.ajax({
+   url:"ajax-delete.php",
+   type:"POST",
+   data:{id:sid},
+   success:function(data){
+   if(data == 1){
     $(e).closest("tr").fadeOut();
-  }
-  else{
+   }
+   else{
     alert("data cant delete");
-  }
-}
+   }
+   }
 
-});
+   });
 
-});
+   });
 
-//show modal box
-$(document).on("click",".edit-btn",function(){
+   //show modal box
+   $(document).on("click",".edit-btn",function(){
      $("#modal").show();
      var eid=$(this).data("id");
+     $.ajax({
+
+       url:"ajax-update.php",
+       type:"POST",
+       data:{id:eid},
+       success:function(data){
+         $("#modal-form table").html(data);
+       }
+     });
 
 
      });
 
-//hide modal box
+   //hide modal box
 
-$("#close-btn").on("click",function(){
-  $("#modal").hide();
-});
+   $("#close-btn").on("click",function(){
+   $("#modal").hide();
+   });
 
 
 
+
+
+   $(document).on("click","#edit-submit",function(){
+   var stid = $("#edit-id").val();
+   var name = $("#edit-name").val();
+   var address =$("#edit-address").val();
+   $.ajax({
+    url:"ajax-update-form.php",
+    type:"POST",
+    data:{id:stid, name:name,address:address },
+    success:function(data){
+      if(data==1){
+        $("#modal").hide();
+        loadTable();
+      }
+      else{
+        alert("problem detect! cant updated!");
+      }
+
+    }
+   });
+   });
+
+  $("#search").on("keyup",function(){
+
+      var srch_trm=$(this).val();
+      $.ajax({
+        url:"ajax-search.php",
+        type:"POST",
+        data:{ssearch:srch_trm},
+        success:function(data){
+          $("#table-data").html(data);
+        }
+      });
+
+
+  });
+
+ $("#delete-btn").on("click",function(){
+   var id = [];
+   $(":checkbox:checked").each(function(key){
+     id[key]=$(this).val();
+
+   });
+
+   
+   if(id.length === 0){
+     alert("please select at least one checkbox!!!");
+
+   }
+   else{
+
+     if(confirm("do you want to really delete these records?")){
+       $.ajax({
+
+         url:"delete-data-php.php",
+         type:"POST",
+         data:{id: id},
+         success:function(data){
+     //console.log(id);
+     if(data==1){
+            loadTable();
+            alert("success");
+     }
+     else{
+
+     }
+         }
+       });
+     }
+   }
+ });
 });
 
 
